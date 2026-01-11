@@ -5,22 +5,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#dc2626">
-    <title>企业节日祝福生成器</title>
+    <title>企业节日祝福全案生成器</title>
     
     <script>
-        // 1. 基础环境注入
+        // 1. 初始化全局状态
         window.process = { env: { API_KEY: "" } };
         window.APP_STARTED = false;
 
-        // 强力刷新：带上随机参数跳过所有缓存
         function forceReset() {
             localStorage.clear();
             sessionStorage.clear();
-            const cleanUrl = window.location.origin + window.location.pathname + '?v=' + Date.now();
-            window.location.replace(cleanUrl);
+            // 彻底切断缓存：使用新的随机版本号
+            window.location.replace(window.location.origin + window.location.pathname + '?v=' + Date.now());
         }
 
-        // 超时检测
+        function runDiagnostic() {
+            const status = window.APP_STARTED ? "✅ 已启动" : "❌ 未响应";
+            alert(`【运行诊断】\n当前状态: ${status}\n\n提示：如果网络诊断是绿色的但依然卡住，请尝试点击“清除缓存并重启”按钮。`);
+        }
+
+        // 12秒后如果没有启动成功，显示错误面板
         setTimeout(() => {
             if (!window.APP_STARTED) {
                 const errDiv = document.getElementById('load-error');
@@ -29,7 +33,7 @@
         }, 12000);
     </script>
 
-    <!-- 2. 干净的导入映射：只保留一组版本，严禁重复 -->
+    <!-- 2. 严格的、无冲突的导入映射 (关键修复点) -->
     <script type="importmap">
 {
   "imports": {
@@ -48,7 +52,7 @@
     <style>
         body { font-family: 'Noto Sans SC', sans-serif; background: #f8fafc; margin: 0; }
         #root:empty::before {
-            content: "正在唤醒 AI 引擎...";
+            content: "正在启动 AI 服务...";
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
             color: #94a3b8; font-size: 14px; font-weight: bold;
             animation: pulse 2s infinite;
@@ -63,22 +67,25 @@
 <body>
     <div id="root"></div>
 
-    <!-- 加载超时后的备选方案 -->
     <div id="load-error">
-        <div class="mb-6 text-6xl">🚀</div>
-        <h2 class="text-xl font-black text-gray-900 mb-2">资源初始化中</h2>
+        <div class="mb-6 text-6xl">✨</div>
+        <h2 class="text-xl font-black text-gray-900 mb-2">正在最后调试</h2>
         <p class="text-gray-500 text-sm mb-8 max-w-xs">
-            由于 AI 模块部署在国际节点，首次加载可能较慢。如果卡住超过 30 秒，请点击下方按钮。
+            网络连接正常。如果页面仍未自动跳转，请尝试手动清理缓存。
         </p>
-        <button onclick="forceReset()" class="w-full max-w-xs bg-red-600 text-white py-4 rounded-2xl font-black shadow-xl active:scale-95 transition-all">
-            清理缓存并强制重启
-        </button>
-        <p class="mt-8 text-[10px] text-gray-400 font-bold">
-            建议：确保已关闭所有广告拦截插件
-        </p>
+        <div class="w-full max-w-xs space-y-3">
+            <button onclick="forceReset()" class="w-full bg-red-600 text-white py-4 rounded-2xl font-black shadow-xl active:scale-95 transition-all">
+                清除缓存并重试
+            </button>
+            <button onclick="runDiagnostic()" class="w-full bg-slate-100 text-slate-600 py-3 rounded-2xl font-bold text-sm">
+                查看运行诊断
+            </button>
+        </div>
     </div>
 
-    <!-- 3. 入口脚本 -->
-    <script type="module" src="./index.tsx"></script>
+    <!-- 3. 入口脚本：使用内联 module 确保解析顺序 -->
+    <script type="module">
+        import "./index.tsx";
+    </script>
 </body>
 </html>
