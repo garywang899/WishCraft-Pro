@@ -25,7 +25,6 @@ const App: React.FC = () => {
   const [isIOS, setIsIOS] = useState(false);
 
   useEffect(() => {
-    // 检测是否是 iOS
     const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
     setIsIOS(isIOSDevice);
 
@@ -38,7 +37,6 @@ const App: React.FC = () => {
     checkKey();
 
     window.addEventListener('beforeinstallprompt', (e) => {
-      console.log('捕获到安装提示事件');
       e.preventDefault();
       setDeferredPrompt(e);
     });
@@ -47,13 +45,21 @@ const App: React.FC = () => {
   const handleInstall = async () => {
     if (deferredPrompt) {
       deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      console.log(`用户安装选择: ${outcome}`);
       setDeferredPrompt(null);
     } else if (isIOS) {
-      alert("请点击 Safari 浏览器底部的【分享】按钮，然后选择【添加到主屏幕】，即可像 APP 一样使用。");
+      alert("【iPhone安装指引】\n1. 点击 Safari 底部【分享】按钮\n2. 选择【添加到主屏幕】\n即可像 APP 一样在桌面使用！");
     } else {
-      alert("请点击浏览器地址栏右侧的【安装】图标，或菜单中的【添加到主屏幕】。");
+      alert("【安装指引】\n请点击浏览器地址栏右侧的【安装】图标，或菜单中的【添加到主屏幕】。");
+    }
+  };
+
+  const handleInvite = () => {
+    const url = window.location.href;
+    const message = `✨ 节日祝福生成器 ✨\n\n专为行政办公打造，一键生成精美贺卡、配音和15秒祝福视频！\n\n🔗 立即体验: ${url}\n\n💡 提示：打开链接后，点击“安装”或“添加到主屏幕”，即可作为独立 App 使用，无需每次打开浏览器。`;
+    
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(message);
+      alert("✅ 邀请文字已复制！\n现在可以去微信/钉钉粘贴发送给朋友了。");
     }
   };
 
@@ -62,15 +68,14 @@ const App: React.FC = () => {
       try {
         await navigator.share({
           title: '节日祝福生成器',
-          text: '企业级行政助手：一键生成节日祝福、配音与视频！',
+          text: '帮我试下这个行政祝福助手，生成的祝福语和配音挺不错的！',
           url: window.location.href,
         });
       } catch (err) {
-        console.log('Share canceled');
+        handleInvite();
       }
     } else {
-      navigator.clipboard.writeText(window.location.href);
-      alert('链接已复制到剪贴板，快发给同事吧！');
+      handleInvite();
     }
   };
 
@@ -163,25 +168,21 @@ const App: React.FC = () => {
           </div>
           
           <div className="flex items-center gap-2 md:gap-4">
-            {/* 改进安装按钮展示逻辑：即便没捕获到事件，也可以通过 Alert 引导 */}
             <button 
               onClick={handleInstall}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs md:text-sm font-bold border transition-colors ${deferredPrompt ? 'bg-red-600 text-white border-red-700 animate-pulse' : 'bg-red-50 text-red-600 border-red-100 hover:bg-red-100'}`}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs md:text-sm font-bold border transition-all ${deferredPrompt ? 'bg-red-600 text-white border-red-700 animate-bounce' : 'bg-red-50 text-red-600 border-red-100'}`}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
-              </svg>
-              {deferredPrompt ? '立即一键安装' : '如何安装应用?'}
+              {deferredPrompt ? '👇 立即安装' : '如何安装?'}
             </button>
 
             <button 
-              onClick={handleShare}
-              className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
-              title="分享应用"
+              onClick={handleInvite}
+              className="px-3 py-1.5 bg-gray-900 text-white rounded-full text-xs md:text-sm font-bold flex items-center gap-1.5 hover:bg-black transition-colors"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 md:h-6 md:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
               </svg>
+              邀请朋友
             </button>
           </div>
         </div>
@@ -270,9 +271,6 @@ const App: React.FC = () => {
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col justify-end p-6 md:p-10">
                           <p className="text-white text-center text-lg md:text-2xl font-bold leading-relaxed tracking-wide drop-shadow-2xl">{state.generatedText}</p>
                         </div>
-                        <div className="absolute top-4 left-4">
-                          <span className="px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-[10px] text-white border border-white/30 font-bold uppercase tracking-widest">Preview Card</span>
-                        </div>
                       </div>
                     )}
                   </div>
@@ -283,18 +281,10 @@ const App: React.FC = () => {
                     {state.isGeneratingAudio ? (
                       <div className="flex items-center gap-3">
                         <div className="animate-bounce h-1.5 w-1.5 bg-amber-500 rounded-full" />
-                        <div className="animate-bounce h-3 w-1.5 bg-amber-500 rounded-full [animation-delay:0.2s]" />
-                        <div className="animate-bounce h-2 w-1.5 bg-amber-500 rounded-full [animation-delay:0.4s]" />
                         <span className="text-sm text-amber-700 font-bold">正在调制节日乐章...</span>
                       </div>
                     ) : (
-                      <>
-                        <div className="flex justify-between items-center">
-                          <span className="text-xs font-bold text-amber-800 uppercase tracking-tighter">专属节日配音</span>
-                          <span className="text-[10px] text-amber-500 px-2 py-0.5 bg-amber-100 rounded-full font-bold">WAV High Quality</span>
-                        </div>
-                        <audio src={state.audioUrl} controls className="w-full h-10 filter sepia" />
-                      </>
+                      <audio src={state.audioUrl} controls className="w-full h-10 filter sepia" />
                     )}
                   </div>
                 )}
@@ -302,15 +292,10 @@ const App: React.FC = () => {
                 {(state.videoUrl || state.isGeneratingVideo) && (
                   <div className="rounded-3xl overflow-hidden shadow-2xl bg-black border-4 border-white shadow-indigo-100">
                     {state.isGeneratingVideo ? (
-                      <div className="aspect-video flex flex-col items-center justify-center gap-4 text-white p-8">
-                        <div className="relative">
-                          <div className="animate-ping absolute inset-0 rounded-full bg-indigo-500 opacity-20" />
-                          <div className="animate-spin rounded-full h-16 w-16 border-4 border-indigo-400 border-t-transparent relative z-10" />
-                        </div>
-                        <div className="text-center">
-                          <p className="text-sm font-black mb-1">正在制作 15s 高清动画</p>
-                          <p className="text-[10px] text-gray-500 max-w-[200px]">这通常需要 1 到 2 分钟，你可以先去处理其他行政事务，别刷新页面哦</p>
-                        </div>
+                      <div className="aspect-video flex flex-col items-center justify-center gap-4 text-white p-8 text-center">
+                        <div className="animate-spin rounded-full h-12 w-12 border-4 border-indigo-400 border-t-transparent mx-auto" />
+                        <p className="text-sm font-black">正在制作 15s 高清动画</p>
+                        <p className="text-[10px] text-gray-500">制作过程约需 1-2 分钟，请耐心等待</p>
                       </div>
                     ) : (
                       <video src={state.videoUrl} controls className="w-full" autoPlay loop playsInline />
@@ -328,14 +313,6 @@ const App: React.FC = () => {
                         保存贺卡
                       </button>
                     )}
-                    {state.audioUrl && (
-                      <button onClick={() => { const l = document.createElement('a'); l.href = state.audioUrl; l.download = '配音.wav'; l.click(); }} className="px-6 py-3 bg-amber-600 text-white text-xs font-black rounded-2xl hover:bg-amber-700 transition-all flex items-center gap-2 active:scale-95">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
-                        </svg>
-                        下载配音
-                      </button>
-                    )}
                   </div>
                 )}
               </div>
@@ -347,7 +324,7 @@ const App: React.FC = () => {
       <footer className="max-w-6xl mx-auto px-4 mt-20 text-center pb-8 border-t pt-10 border-gray-100">
         <div className="inline-flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-full border border-gray-100 mb-4">
           <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
-          <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Service Online · Version 3.1 PWA</span>
+          <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">PWA Ready · {window.location.hostname}</span>
         </div>
         <p className="text-gray-400 text-[10px] font-bold">专为企业行政公关打造 · 高端节日祝福一键生成</p>
       </footer>
