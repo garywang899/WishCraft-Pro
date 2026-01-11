@@ -54,12 +54,13 @@ const App: React.FC = () => {
   };
 
   const handleInvite = () => {
-    const currentUrl = window.location.href.split('?')[0].split('#')[0];
+    // 确保获取的是基础 URL，不带冗余参数
+    const currentUrl = window.location.origin + window.location.pathname;
     const message = `🎊 推荐一个超好用的【节日祝福生成器】\n\n行政/公关必备！一键生成：\n✍️ 专业祝福文案\n🎨 精美节日贺卡\n🎙️ 磁性真人配音\n🎬 15秒动态祝福视频\n\n👇 点击链接立即体验（可安装到桌面）：\n${currentUrl}\n\n💡 提示：打开后点击“安装”或“添加到主屏幕”，使用更方便！`;
     
     if (navigator.clipboard) {
       navigator.clipboard.writeText(message).then(() => {
-        alert("✅ 邀请口令已复制！\n\n您可以直接粘贴发送给微信/钉钉的朋友了。\n请确保发送的是这个地址：\n" + currentUrl);
+        alert("✅ 邀请口令已复制！\n\n您可以直接粘贴发送给微信/钉钉的朋友了。\n\n链接地址：\n" + currentUrl);
       });
     }
   };
@@ -173,7 +174,7 @@ const App: React.FC = () => {
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
               </svg>
-              邀请安装
+              邀请朋友
             </button>
           </div>
         </div>
@@ -261,11 +262,6 @@ const App: React.FC = () => {
                           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent flex flex-col justify-end p-6 md:p-10">
                             <p className="text-white text-center text-lg md:text-xl font-bold leading-relaxed drop-shadow-lg">{state.generatedText}</p>
                           </div>
-                          <button onClick={() => { const a = document.createElement('a'); a.href = state.imageUrl; a.download = 'greeting.png'; a.click(); }} className="absolute top-4 right-4 bg-white/20 hover:bg-white/40 backdrop-blur-md p-2 rounded-full text-white transition-all opacity-0 group-hover:opacity-100">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                            </svg>
-                          </button>
                         </div>
                       )}
                     </div>
