@@ -7,34 +7,29 @@
     <title>企业节日祝福生成器</title>
     
     <script>
-        // 核心标志位：用于检测脚本是否成功运行
+        // 核心运行标志
         window.APP_STARTED = false;
 
-        // 强力重置：清除缓存并强制带随机数刷新，防止浏览器固执地加载旧的错误脚本
+        // 强力重置：清除一切本地状态，并带随机参数重定向
         function forceReset() {
-            console.log("执行强力重置...");
+            console.log("执行物理级重置...");
             localStorage.clear();
             sessionStorage.clear();
-            const cleanUrl = window.location.origin + window.location.pathname + '?v=' + Date.now();
-            window.location.replace(cleanUrl);
+            // 使用 replace 替换当前历史记录，防止回退到错误页面
+            window.location.replace(window.location.origin + window.location.pathname + '?refresh=' + Date.now());
         }
 
-        // 容错监控：如果 8 秒内脚本没跑起来，就显示重置界面
+        // 容错监控：缩短检测时间到 5 秒，如果没启动则显示修复界面
         setTimeout(() => {
             if (!window.APP_STARTED) {
-                console.warn("应用启动超时，显示引导界面");
                 const errDiv = document.getElementById('load-error');
                 if(errDiv) errDiv.style.display = 'flex';
+                console.error("检测到环境加载死锁，已唤起修复界面");
             }
-        }, 8000);
-
-        // 监听全局错误，方便调试
-        window.addEventListener('error', function(e) {
-            console.error('浏览器检测到脚本错误:', e.message);
-        });
+        }, 5000);
     </script>
 
-    <!-- 唯一正确的导入映射：严禁包含重复项或带斜杠的路径 -->
+    <!-- 严格模式导入映射：只保留唯一合法的路径，严禁任何重复或带斜杠的项 -->
     <script type="importmap">
 {
   "imports": {
@@ -53,7 +48,7 @@
     <style>
         body { font-family: 'Noto Sans SC', sans-serif; background: #f8fafc; margin: 0; }
         #root:empty::before {
-            content: "正在唤醒 AI 引擎...";
+            content: "正在启动 AI 服务...";
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
             color: #94a3b8; font-size: 14px; font-weight: bold;
             animation: pulse 2s infinite;
@@ -61,31 +56,31 @@
         @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
         #load-error {
             display: none; position: fixed; inset: 0; background: white; z-index: 10000;
-            flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center;
+            flex-direction: column; align-items: center; justify-content: center; padding: 24px; text-align: center;
         }
     </style>
 </head>
 <body>
     <div id="root"></div>
 
-    <!-- 引导界面：仅在浏览器加载脚本失败时出现 -->
+    <!-- 环境修复层 -->
     <div id="load-error">
-        <div class="mb-6 text-6xl">🛠️</div>
-        <h2 class="text-2xl font-black text-gray-900 mb-2">正在清理旧版配置</h2>
-        <p class="text-gray-500 text-sm mb-8 max-w-xs leading-relaxed">
-            检测到您之前的浏览器缓存中存有冲突代码。请点击下方按钮，系统将为您同步最新的无冲突版本。
+        <div class="mb-6 text-7xl animate-bounce">⚡</div>
+        <h2 class="text-2xl font-black text-gray-900 mb-2">系统环境冲突已锁定</h2>
+        <p class="text-gray-500 text-sm mb-10 max-w-xs leading-relaxed">
+            检测到您的浏览器正受到旧版冲突配置的干扰。点击下方按钮，系统将执行“物理重置”以应用最新的无冲突修复方案。
         </p>
         <div class="w-full max-w-xs">
-            <button onclick="forceReset()" class="w-full bg-red-600 text-white py-4 rounded-2xl font-black shadow-xl active:scale-95 transition-all">
-                清理冲突缓存并重启应用
+            <button onclick="forceReset()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black shadow-xl active:scale-95 transition-all">
+                立即执行物理重置并进入
             </button>
-            <p class="mt-4 text-[10px] text-gray-400 font-bold uppercase tracking-widest text-center">
-                Syncing Latest Clean Code...
+            <p class="mt-6 text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em]">
+                Deep Cleaning & Re-initializing...
             </p>
         </div>
     </div>
 
-    <!-- 入口脚本 -->
+    <!-- 启动主入口 -->
     <script type="module" src="index.tsx"></script>
 </body>
 </html>
