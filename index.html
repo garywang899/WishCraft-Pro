@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -25,16 +24,16 @@
             alert(`【深度运行诊断】\n状态: ${status}\n\n解决办法：\n如果显示“未响应”，请连续点击下方的红色按钮。系统会强制加载最新的无冲突代码。`);
         }
 
-        // 12秒自动超时检测
+        // 15秒自动超时检测
         setTimeout(() => {
             if (!window.APP_STARTED) {
                 const errDiv = document.getElementById('load-error');
                 if(errDiv) errDiv.style.display = 'flex';
             }
-        }, 12000);
+        }, 15000);
     </script>
 
-    <!-- 2. 干净、唯一的导入映射（严禁任何重复或带斜杠的路径） -->
+    <!-- 2. 严格、唯一的导入映射（彻底移除冗余项） -->
     <script type="importmap">
 {
   "imports": {
