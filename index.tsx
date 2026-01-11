@@ -5,6 +5,7 @@ import App from './App.tsx';
 
 // 只要成功解析并执行到这里，立即解除遮罩
 (window as any).APP_STARTED = true;
+if ((window as any).BOOT_LOG) (window as any).BOOT_LOG.push("index.tsx 脚本开始执行。");
 
 const container = document.getElementById('root');
 
@@ -16,9 +17,9 @@ if (container) {
         <App />
       </React.StrictMode>
     );
-    console.log("App Core initialized and rendered.");
+    if ((window as any).BOOT_LOG) (window as any).BOOT_LOG.push("React 渲染指令已发出。");
   } catch (error) {
     console.error("Critical Render Error:", error);
-    (window as any).LAST_ERROR = "渲染失败: " + String(error);
+    if ((window as any).BOOT_LOG) (window as any).BOOT_LOG.push("渲染阶段报错: " + error);
   }
 }

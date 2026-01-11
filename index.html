@@ -5,21 +5,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#dc2626">
-    <title>节日祝福生成器</title>
+    <title>企业节日祝福全案生成器</title>
+    
     <script>
-        // 1. 核心环境注入 (最优先级，防止 SDK 报错)
+        // 1. 基础环境与状态监控
         window.process = { env: { API_KEY: "" } };
         window.APP_STARTED = false;
-        window.LAST_ERROR = null;
+        window.BOOT_LOG = ["系统初始化中..."];
 
-        // 全局错误监控
-        window.onerror = function(msg, url, line, col, error) {
-            window.LAST_ERROR = msg + " (at " + url + ":" + line + ")";
-            console.error("Diagnostic Error:", msg);
-            return false;
-        };
+        function log(msg) {
+            console.log("[引导程序]", msg);
+            window.BOOT_LOG.push(new Date().toLocaleTimeString() + ": " + msg);
+        }
 
-        // 强力重置：清除所有缓存并带上时间戳重新加载
+        // 捕捉全局加载错误（包括资源加载失败）
+        window.addEventListener('error', function(e) {
+            log("加载错误: " + (e.message || "资源加载失败") + " 于 " + (e.filename || "未知位置"));
+        }, true);
+
+        // 强力重置：清除缓存并强刷页面
         function forceReset() {
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.getRegistrations().then(regs => {
@@ -28,41 +32,45 @@
             }
             localStorage.clear();
             sessionStorage.clear();
-            const cleanUrl = window.location.origin + window.location.pathname + '?v=' + Date.now();
-            window.location.replace(cleanUrl);
+            // 使用随机参数防止浏览器缓存旧的 HTML
+            window.location.replace(window.location.origin + window.location.pathname + '?r=' + Date.now());
         }
 
-        // 诊断弹窗
+        // 网络连通性快速诊断
+        async function testNetwork() {
+            const targets = [
+                { name: "React 核心 (esm.sh)", url: "https://esm.sh/react@19.0.0" },
+                { name: "AI SDK (esm.sh)", url: "https://esm.sh/@google/genai@1.3.0" }
+            ];
+            let report = "【网络连通性测试】\n\n";
+            for (const t of targets) {
+                try {
+                    const start = Date.now();
+                    // 仅测试头部，不下载完整内容
+                    await fetch(t.url, { method: 'HEAD', mode: 'no-cors' });
+                    report += `✅ ${t.name}: 连接成功 (${Date.now() - start}ms)\n`;
+                } catch (e) {
+                    report += `❌ ${t.name}: 连接失败 (请检查 VPN 或网络代理)\n`;
+                }
+            }
+            alert(report + "\n提示：如果测试全部成功但仍卡住，请尝试更换 Chrome 浏览器。");
+        }
+
         function showDebug() {
-            const info = window.LAST_ERROR || "目前暂无代码错误。";
-            alert("【启动诊断报告】\n\n状态：" + (window.APP_STARTED ? "已启动" : "启动中/已卡死") + "\n报错：" + info + "\n\n排除建议：\n1. 请检查网络是否可访问 esm.sh\n2. 尝试关闭广告拦截插件\n3. 切换为手机热点重试");
+            alert("【详细启动日志】\n\n" + window.BOOT_LOG.join("\n"));
         }
 
-        // 超时自动显示错误遮罩 (12秒)
+        // 启动超时监控 (延长至 15 秒)
         setTimeout(() => {
             if (!window.APP_STARTED) {
+                log("启动超时 (15s)");
                 const errDiv = document.getElementById('load-error');
                 if(errDiv) errDiv.style.display = 'flex';
             }
-        }, 12000); 
+        }, 15000);
     </script>
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Noto Sans SC', sans-serif; background-color: #f8fafc; margin: 0; }
-        #root:empty::before {
-            content: "正在加载 AI 核心引擎...";
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            color: #94a3b8; font-size: 14px; font-weight: bold;
-        }
-        #load-error {
-            display: none; position: fixed; inset: 0; background: white; z-index: 10000;
-            flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center;
-        }
-    </style>
-
-    <!-- 统一使用 19.0.0 版本，彻底消除 Dual Package Hazard 冲突 -->
+    <!-- 2. 严格的 Import Map：移除所有版本冲突 -->
     <script type="importmap">
 {
   "imports": {
@@ -75,29 +83,55 @@
   }
 }
 </script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Noto Sans SC', sans-serif; background: #f8fafc; margin: 0; }
+        #root:empty::before {
+            content: "正在启动 AI 引擎...";
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            color: #94a3b8; font-size: 14px; font-weight: bold;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+        #load-error {
+            display: none; position: fixed; inset: 0; background: white; z-index: 10000;
+            flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center;
+        }
+    </style>
 </head>
 <body>
     <div id="root"></div>
 
     <div id="load-error">
-        <div class="text-indigo-500 mb-6 text-6xl animate-pulse">📡</div>
-        <h2 class="text-xl font-bold text-gray-900 mb-2">资源加载耗时较长</h2>
+        <div class="mb-6 text-6xl animate-bounce">📡</div>
+        <h2 class="text-xl font-black text-gray-900 mb-2">资源加载遇阻</h2>
         <p class="text-gray-500 text-sm mb-8 max-w-xs">
-            由于 AI 模块部署在海外节点，下载可能受网络环境影响。
+            由于 AI 模块部署在海外节点，下载可能被您的防火墙或广告拦截插件阻断。
         </p>
         <div class="w-full max-w-xs space-y-3">
             <button onclick="forceReset()" class="w-full bg-red-600 text-white py-4 rounded-2xl font-black shadow-xl active:scale-95 transition-all">
-                清除缓存并重试
+                清理缓存并重试
             </button>
-            <button onclick="showDebug()" class="w-full bg-slate-100 text-slate-600 py-3 rounded-2xl font-bold text-xs">
-                查看启动诊断报告
-            </button>
+            <div class="grid grid-cols-2 gap-3">
+                <button onclick="testNetwork()" class="bg-slate-100 text-slate-600 py-3 rounded-2xl font-bold text-xs">
+                    网络诊断
+                </button>
+                <button onclick="showDebug()" class="bg-slate-100 text-slate-600 py-3 rounded-2xl font-bold text-xs">
+                    运行日志
+                </button>
+            </div>
         </div>
-        <p class="mt-8 text-[10px] text-gray-400">
-            提示：若在中国境内使用，建议使用手机热点尝试。
+        <p class="mt-8 text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+            建议：尝试关闭广告拦截插件或使用手机热点
         </p>
     </div>
 
-    <script type="module" src="./index.tsx"></script>
+    <!-- 3. 入口脚本 -->
+    <script type="module">
+        import "./index.tsx";
+        if (window.BOOT_LOG) window.BOOT_LOG.push("入口模块已触发加载。");
+    </script>
 </body>
 </html>
