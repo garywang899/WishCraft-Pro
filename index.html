@@ -13,40 +13,31 @@
     <style>
         body { font-family: 'Noto Sans SC', sans-serif; background-color: #f8fafc; margin: 0; }
         #root:empty::before {
-            content: "正在启动 AI 引擎...";
+            content: "正在安全启动 AI 祝福引擎...";
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             color: #64748b;
             font-size: 14px;
+            font-weight: bold;
         }
-        #error-overlay {
+        #error-display {
             display: none;
             position: fixed;
-            inset: 0;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             background: white;
-            z-index: 10002;
-            padding: 20px;
-            color: #ef4444;
-            font-family: monospace;
-            overflow: auto;
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+            text-align: center;
+            z-index: 9999;
+            width: 90%;
+            max-width: 400px;
         }
     </style>
-    <script>
-        // 设置全局环境变量
-        window.process = { env: { API_KEY: "" }, nextTick: (cb) => setTimeout(cb, 0), browser: true };
-        
-        // 捕获全局错误
-        window.onerror = function(msg, url, line, col, error) {
-            const overlay = document.getElementById('error-overlay');
-            if (overlay) {
-                overlay.style.display = 'block';
-                overlay.innerHTML = `<h3>加载出错:</h3><p>${msg}</p><small>${url}:${line}</small>`;
-            }
-            return false;
-        };
-    </script>
     <script type="importmap">
 {
   "imports": {
@@ -59,10 +50,26 @@
   }
 }
 </script>
+    <script>
+        // 监控加载状态
+        setTimeout(() => {
+            const root = document.getElementById('root');
+            if (root && root.innerHTML === "") {
+                document.getElementById('error-display').style.display = 'block';
+            }
+        }, 8000);
+    </script>
 </head>
 <body>
     <div id="root"></div>
-    <div id="error-overlay"></div>
+    
+    <div id="error-display">
+        <div class="text-red-500 mb-4 text-4xl">⚠️</div>
+        <h3 class="text-lg font-bold text-gray-900 mb-2">启动时间过长</h3>
+        <p class="text-gray-500 text-sm mb-6">这通常是由于网络无法连接到 AI 服务库导致的。</p>
+        <button onclick="location.reload()" class="w-full bg-red-600 text-white py-3 rounded-xl font-bold">尝试重新加载</button>
+    </div>
+
     <script type="module" src="index.tsx"></script>
 </body>
 </html>

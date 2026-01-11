@@ -1,8 +1,17 @@
 
-// 临时禁用 SW 拦截，以彻底解决卡死问题
-self.addEventListener('install', () => self.skipWaiting());
-self.addEventListener('activate', () => self.clients.claim());
+self.addEventListener('install', (e) => {
+  self.skipWaiting();
+});
+
+self.addEventListener('activate', (e) => {
+  e.waitUntil(
+    caches.keys().then((keys) => {
+      return Promise.all(keys.map(key => caches.delete(key)));
+    }).then(() => self.clients.claim())
+  );
+});
+
 self.addEventListener('fetch', (event) => {
-  // 不做任何拦截，直接透传网络请求
+  // 不拦截请求，直接透传
   return;
 });
