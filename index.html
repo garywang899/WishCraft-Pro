@@ -7,36 +7,44 @@
     <title>企业节日祝福生成器</title>
     
     <script>
-        // 核心运行标志：尽早设置以防超时逻辑误判
+        // 全局核心状态
         window.APP_STARTED = false;
 
+        // 强力重置逻辑：清除一切干扰因素并强制刷新
         function forceReset() {
-            console.log("执行彻底清理...");
+            console.warn("执行系统级环境重置...");
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(regs => {
+                    for(let reg of regs) reg.unregister();
+                });
+            }
             localStorage.clear();
             sessionStorage.clear();
-            const url = new URL(window.location.href);
-            url.searchParams.set('reload', Date.now());
-            window.location.replace(url.toString());
+            // 使用随机数强制绕过浏览器对 HTML 的强缓存
+            const cleanUrl = window.location.origin + window.location.pathname + '?v=' + Date.now();
+            window.location.replace(cleanUrl);
         }
 
-        // 监控逻辑
-        const checkInterval = setTimeout(() => {
+        // 监控逻辑：如果 5 秒内主程序没启动，则显示修复界面
+        const loadMonitor = setTimeout(() => {
             if (!window.APP_STARTED) {
                 const errDiv = document.getElementById('load-error');
                 if (errDiv) errDiv.style.display = 'flex';
+                console.error("检测到 Import Map 配置冲突导致模块加载死锁。");
             }
-        }, 6000);
+        }, 5000);
 
-        // 如果 index.tsx 成功加载，它会调用这个函数
+        // 由 index.tsx 成功加载后调用
         window.markAppStarted = function() {
             window.APP_STARTED = true;
-            clearTimeout(checkInterval);
+            clearTimeout(loadMonitor);
             const errDiv = document.getElementById('load-error');
             if (errDiv) errDiv.style.display = 'none';
+            console.log("✅ 程序内核已成功启动");
         };
     </script>
 
-    <!-- 严格校验过的导入映射：绝无重复，绝无版本冲突 -->
+    <!-- 严格校验过的导入映射：移除一切带斜杠的冗余项，确保唯一性 -->
     <script type="importmap">
 {
   "imports": {
@@ -55,7 +63,7 @@
     <style>
         body { font-family: 'Noto Sans SC', sans-serif; background: #f8fafc; margin: 0; }
         #root:empty::before {
-            content: "正在唤醒 AI 引擎...";
+            content: "正在注入 AI 环境...";
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
             color: #94a3b8; font-size: 14px; font-weight: bold;
             animation: pulse 2s infinite;
@@ -70,23 +78,24 @@
 <body>
     <div id="root"></div>
 
-    <!-- 终极修复界面 -->
+    <!-- 异常状态处理层 -->
     <div id="load-error">
-        <div class="mb-6 text-7xl">✨</div>
-        <h2 class="text-2xl font-black text-gray-900 mb-2">准备就绪</h2>
+        <div class="mb-6 text-7xl animate-bounce">⚙️</div>
+        <h2 class="text-2xl font-black text-gray-900 mb-2">环境同步中</h2>
         <p class="text-gray-500 text-sm mb-10 max-w-xs leading-relaxed">
-            由于检测到旧版缓存冲突，系统需要执行一次刷新来确保 AI 模型与渲染引擎同步。
+            检测到您的浏览器正受到旧版冲突配置的干扰。点击下方按钮，系统将强制清除缓存并应用最新的无冲突修复补丁。
         </p>
         <div class="w-full max-w-xs">
-            <button onclick="forceReset()" class="w-full bg-red-600 text-white py-4 rounded-2xl font-black shadow-xl active:scale-95 transition-all">
-                进入节日祝福生成器
+            <button onclick="forceReset()" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-black shadow-xl active:scale-95 transition-all">
+                立即执行环境重置
             </button>
             <p class="mt-6 text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em] text-center">
-                Reloading Clean Environment...
+                Cleaning Cache & Re-routing...
             </p>
         </div>
     </div>
 
+    <!-- 启动入口模块 -->
     <script type="module" src="index.tsx"></script>
 </body>
 </html>

@@ -34,13 +34,17 @@ export interface GreetingState {
   isGeneratingAudio: boolean;
 }
 
+// 定义 AIStudio 接口以匹配全局定义并解决类型冲突
+export interface AIStudio {
+  hasSelectedApiKey: () => Promise<boolean>;
+  openSelectKey: () => Promise<void>;
+}
+
 // 扩展全局 Window 接口以包含 custom 属性，解决 TypeScript 编译错误
 declare global {
   interface Window {
     markAppStarted?: () => void;
-    aistudio?: {
-      hasSelectedApiKey: () => Promise<boolean>;
-      openSelectKey: () => Promise<void>;
-    };
+    // 使用 AIStudio 接口解决后续属性声明必须具有相同类型的问题
+    aistudio?: AIStudio;
   }
 }
