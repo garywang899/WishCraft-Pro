@@ -5,75 +5,49 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#dc2626">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>节日祝福生成器</title>
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3893/3893043.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Noto Sans SC', sans-serif;
-            background-color: #f8fafc;
-            margin: 0;
-            overflow-x: hidden;
-        }
+        body { font-family: 'Noto Sans SC', sans-serif; background-color: #f8fafc; margin: 0; }
         #error-display {
             display: none;
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: #fee2e2;
-            color: #b91c1c;
-            padding: 1.5rem;
-            z-index: 10000;
-            font-family: sans-serif;
-            font-size: 14px;
-            white-space: pre-wrap;
-            border-bottom: 4px solid #ef4444;
-            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+            top: 0; left: 0; right: 0;
+            background: #fee2e2; color: #b91c1c;
+            padding: 1.5rem; z-index: 10000;
+            font-size: 14px; border-bottom: 4px solid #ef4444;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
         }
         #loading-indicator {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            width: 100vw;
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 9999;
-            background: white;
-            transition: opacity 0.5s ease-out;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            height: 100vh; width: 100vw; position: fixed; top: 0; left: 0;
+            z-index: 9999; background: white; transition: opacity 0.4s ease-out;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
     <script>
-        // 环境补丁：必须在任何模块加载前运行
-        window.process = { 
-            env: { API_KEY: "" },
-            nextTick: (cb) => setTimeout(cb, 0),
-            browser: true
-        };
+        // 环境补丁
+        window.process = { env: { API_KEY: "" }, nextTick: (cb) => setTimeout(cb, 0), browser: true };
 
-        window.onerror = function(msg, url, line, col, error) {
-            console.error('Fatal:', msg, error);
+        const showError = (msg, details = "") => {
             const display = document.getElementById('error-display');
             if (display) {
                 display.style.display = 'block';
-                display.innerHTML = `<strong>应用运行出错:</strong><br>${msg}<br><small>出错位置: ${url?.split('/').pop() || '未知文件'} 第 ${line} 行</small><br><p style="margin-top:10px; font-weight: bold;">[点击页面任意位置尝试强制刷新]</p>`;
-                display.onclick = () => window.location.reload(true);
+                display.innerHTML = `<strong>系统启动异常:</strong><br>${msg}${details ? '<br><small>' + details + '</small>' : ''}<br><p style="margin-top:10px text-xs opacity-75">提示：如果应用 UI 已经出现，请忽略此提示或刷新页面。</p>`;
             }
-            const loading = document.getElementById('loading-indicator');
-            if (loading) loading.style.opacity = '0';
-            setTimeout(() => { if (loading) loading.style.display = 'none'; }, 500);
+        };
+
+        window.onerror = (msg, url, line, col, error) => {
+            // 忽略非核心的资源错误
+            if (msg.toLowerCase().includes('extension') || msg.toLowerCase().includes('script error')) return false;
+            showError("环境运行异常", msg);
             return false;
         };
     </script>
-<script type="importmap">
+    <script type="importmap">
 {
   "imports": {
     "react": "https://esm.sh/react@19.0.0",
@@ -89,23 +63,10 @@
 <body>
     <div id="error-display"></div>
     <div id="loading-indicator">
-        <div style="width: 54px; height: 54px; border: 5px solid #f1f5f9; border-top: 5px solid #dc2626; border-radius: 50%; animation: spin 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;"></div>
-        <p style="margin-top: 1.5rem; font-weight: 800; color: #1e293b; font-size: 1.1rem; letter-spacing: 1px;">正在启动祝福助手...</p>
-        <p style="margin-top: 0.5rem; font-size: 13px; color: #94a3b8; font-weight: 500;">首次加载可能需要较长时间</p>
+        <div style="width: 50px; height: 50px; border: 4px solid #f1f5f9; border-top: 4px solid #dc2626; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+        <p style="margin-top: 1.5rem; font-weight: bold; color: #1e293b;">祝福助手启动中...</p>
     </div>
-    
     <div id="root"></div>
-    
-    <script type="module" src="index.tsx"></script>
-
-    <script>
-      // 这里的逻辑作为兜底：如果模块系统在 10 秒内没能完成加载，尝试提示用户
-      setTimeout(() => {
-          const loading = document.getElementById('loading-indicator');
-          if (loading && loading.style.display !== 'none') {
-              console.warn('Startup taking longer than expected...');
-          }
-      }, 10000);
-    </script>
+    <script type="module" src="index.tsx" onerror="showError('主程序加载失败', '无法读取 index.tsx 文件。请检查网络后刷新。')"></script>
 </body>
 </html>
