@@ -22,8 +22,13 @@ const App: React.FC = () => {
   const [hasApiKey, setHasApiKey] = useState(true);
   const [showKeyModal, setShowKeyModal] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [isIOS, setIsIOS] = useState(false);
 
   useEffect(() => {
+    // 检测是否是 iOS
+    const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+    setIsIOS(isIOSDevice);
+
     const checkKey = async () => {
       if (window.aistudio && window.aistudio.hasSelectedApiKey) {
         const has = await window.aistudio.hasSelectedApiKey();
@@ -33,6 +38,7 @@ const App: React.FC = () => {
     checkKey();
 
     window.addEventListener('beforeinstallprompt', (e) => {
+      console.log('捕获到安装提示事件');
       e.preventDefault();
       setDeferredPrompt(e);
     });
@@ -42,9 +48,12 @@ const App: React.FC = () => {
     if (deferredPrompt) {
       deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === 'accepted') {
-        setDeferredPrompt(null);
-      }
+      console.log(`用户安装选择: ${outcome}`);
+      setDeferredPrompt(null);
+    } else if (isIOS) {
+      alert("请点击 Safari 浏览器底部的【分享】按钮，然后选择【添加到主屏幕】，即可像 APP 一样使用。");
+    } else {
+      alert("请点击浏览器地址栏右侧的【安装】图标，或菜单中的【添加到主屏幕】。");
     }
   };
 
@@ -53,7 +62,7 @@ const App: React.FC = () => {
       try {
         await navigator.share({
           title: '节日祝福生成器',
-          text: '帮我试下这个行政祝福助手，生成的祝福语和配音挺不错的！',
+          text: '企业级行政助手：一键生成节日祝福、配音与视频！',
           url: window.location.href,
         });
       } catch (err) {
@@ -61,7 +70,7 @@ const App: React.FC = () => {
       }
     } else {
       navigator.clipboard.writeText(window.location.href);
-      alert('链接已复制到剪贴板，快发给朋友吧！');
+      alert('链接已复制到剪贴板，快发给同事吧！');
     }
   };
 
@@ -154,17 +163,17 @@ const App: React.FC = () => {
           </div>
           
           <div className="flex items-center gap-2 md:gap-4">
-            {deferredPrompt && (
-              <button 
-                onClick={handleInstall}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-600 rounded-full text-xs md:text-sm font-bold border border-red-100 hover:bg-red-100 transition-colors"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
-                </svg>
-                安装应用
-              </button>
-            )}
+            {/* 改进安装按钮展示逻辑：即便没捕获到事件，也可以通过 Alert 引导 */}
+            <button 
+              onClick={handleInstall}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs md:text-sm font-bold border transition-colors ${deferredPrompt ? 'bg-red-600 text-white border-red-700 animate-pulse' : 'bg-red-50 text-red-600 border-red-100 hover:bg-red-100'}`}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+              {deferredPrompt ? '立即一键安装' : '如何安装应用?'}
+            </button>
+
             <button 
               onClick={handleShare}
               className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
@@ -338,7 +347,7 @@ const App: React.FC = () => {
       <footer className="max-w-6xl mx-auto px-4 mt-20 text-center pb-8 border-t pt-10 border-gray-100">
         <div className="inline-flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-full border border-gray-100 mb-4">
           <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
-          <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Service Online · Version 3.0 PWA</span>
+          <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Service Online · Version 3.1 PWA</span>
         </div>
         <p className="text-gray-400 text-[10px] font-bold">专为企业行政公关打造 · 高端节日祝福一键生成</p>
       </footer>
