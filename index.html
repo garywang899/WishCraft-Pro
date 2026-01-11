@@ -6,66 +6,49 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#dc2626">
     <title>节日祝福生成器</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Noto Sans SC', sans-serif; background-color: #f8fafc; margin: 0; }
-        #root:empty::before {
-            content: "正在安全启动 AI 祝福引擎...";
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: #64748b;
-            font-size: 14px;
-            font-weight: bold;
-        }
-        #load-error {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: white;
-            z-index: 10000;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            text-align: center;
-        }
-    </style>
+    <!-- 1. 基础环境注入：必须在所有脚本之前 -->
     <script>
-        // 环境补丁：防止 SDK 报错
-        window.process = window.process || { env: { API_KEY: "" } };
+        window.process = { env: { API_KEY: "" } };
+        window.APP_STARTED = false;
         
-        // 全局错误捕获
-        window.onerror = function(msg, url, line) {
-            console.error("Critical Error:", msg, "at", url, ":", line);
-            document.getElementById('load-error').style.display = 'flex';
-            return false;
-        };
-
-        // 超时检测
-        setTimeout(() => {
-            if (!window.APP_STARTED) {
-                document.getElementById('load-error').style.display = 'flex';
-            }
-        }, 6000);
-
-        // 强力刷新：清除所有缓存
+        // 强力重置函数
         function forceReset() {
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.getRegistrations().then(regs => {
                     for(let reg of regs) reg.unregister();
                 });
             }
-            caches.keys().then(keys => {
-                keys.forEach(key => caches.delete(key));
-            });
             localStorage.clear();
             sessionStorage.clear();
-            location.reload(true);
+            location.href = location.origin + location.pathname + '?t=' + Date.now();
         }
+
+        // 监控启动
+        setTimeout(() => {
+            if (!window.APP_STARTED) {
+                const errDiv = document.getElementById('load-error');
+                if(errDiv) errDiv.style.display = 'flex';
+            }
+        }, 10000); // 延长到10秒
     </script>
+
+    <!-- 2. 核心样式 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Noto Sans SC', sans-serif; background-color: #f8fafc; margin: 0; }
+        #root:empty::before {
+            content: "正在启动 AI 引擎...";
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            color: #64748b; font-size: 14px; font-weight: bold;
+        }
+        #load-error {
+            display: none; position: fixed; inset: 0; background: white; z-index: 10000;
+            flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center;
+        }
+    </style>
+
+    <!-- 3. 极简导入映射 (修复冲突) -->
     <script type="importmap">
 {
   "imports": {
@@ -83,15 +66,15 @@
     <div id="root"></div>
 
     <div id="load-error">
-        <div class="text-red-500 mb-6 text-5xl">⚙️</div>
-        <h2 class="text-xl font-bold text-gray-900 mb-2">引擎启动受阻</h2>
-        <p class="text-gray-500 text-sm mb-8 max-w-xs">由于网络波动或浏览器旧缓存干扰，AI 服务未能及时响应。</p>
-        <button onclick="forceReset()" class="w-full max-w-xs bg-red-600 hover:bg-red-700 text-white py-4 rounded-2xl font-black shadow-xl transition-all active:scale-95">
+        <div class="text-red-500 mb-6 text-6xl">🚀</div>
+        <h2 class="text-xl font-bold text-gray-900 mb-2">正在全力加速中</h2>
+        <p class="text-gray-500 text-sm mb-8 max-w-xs">AI 模块下载较慢。如果多次出现此界面，请尝试切换网络环境。</p>
+        <button onclick="forceReset()" class="w-full max-w-xs bg-red-600 text-white py-4 rounded-2xl font-black shadow-xl">
             清除缓存并强制重启
         </button>
-        <p class="mt-4 text-xs text-gray-400">重启后将重新下载最新的 AI 模块</p>
     </div>
 
+    <!-- 4. 启动脚本 -->
     <script type="module" src="index.tsx"></script>
 </body>
 </html>
