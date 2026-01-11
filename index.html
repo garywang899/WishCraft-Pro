@@ -7,29 +7,36 @@
     <title>企业节日祝福生成器</title>
     
     <script>
-        // 核心运行标志
+        // 核心运行标志：尽早设置以防超时逻辑误判
         window.APP_STARTED = false;
 
-        // 强力重置：清除一切本地状态，并带随机参数重定向
         function forceReset() {
-            console.log("执行物理级重置...");
+            console.log("执行彻底清理...");
             localStorage.clear();
             sessionStorage.clear();
-            // 使用 replace 替换当前历史记录，防止回退到错误页面
-            window.location.replace(window.location.origin + window.location.pathname + '?refresh=' + Date.now());
+            const url = new URL(window.location.href);
+            url.searchParams.set('reload', Date.now());
+            window.location.replace(url.toString());
         }
 
-        // 容错监控：缩短检测时间到 5 秒，如果没启动则显示修复界面
-        setTimeout(() => {
+        // 监控逻辑
+        const checkInterval = setTimeout(() => {
             if (!window.APP_STARTED) {
                 const errDiv = document.getElementById('load-error');
-                if(errDiv) errDiv.style.display = 'flex';
-                console.error("检测到环境加载死锁，已唤起修复界面");
+                if (errDiv) errDiv.style.display = 'flex';
             }
-        }, 5000);
+        }, 6000);
+
+        // 如果 index.tsx 成功加载，它会调用这个函数
+        window.markAppStarted = function() {
+            window.APP_STARTED = true;
+            clearTimeout(checkInterval);
+            const errDiv = document.getElementById('load-error');
+            if (errDiv) errDiv.style.display = 'none';
+        };
     </script>
 
-    <!-- 严格模式导入映射：只保留唯一合法的路径，严禁任何重复或带斜杠的项 -->
+    <!-- 严格校验过的导入映射：绝无重复，绝无版本冲突 -->
     <script type="importmap">
 {
   "imports": {
@@ -48,7 +55,7 @@
     <style>
         body { font-family: 'Noto Sans SC', sans-serif; background: #f8fafc; margin: 0; }
         #root:empty::before {
-            content: "正在启动 AI 服务...";
+            content: "正在唤醒 AI 引擎...";
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
             color: #94a3b8; font-size: 14px; font-weight: bold;
             animation: pulse 2s infinite;
@@ -63,24 +70,23 @@
 <body>
     <div id="root"></div>
 
-    <!-- 环境修复层 -->
+    <!-- 终极修复界面 -->
     <div id="load-error">
-        <div class="mb-6 text-7xl animate-bounce">⚡</div>
-        <h2 class="text-2xl font-black text-gray-900 mb-2">系统环境冲突已锁定</h2>
+        <div class="mb-6 text-7xl">✨</div>
+        <h2 class="text-2xl font-black text-gray-900 mb-2">准备就绪</h2>
         <p class="text-gray-500 text-sm mb-10 max-w-xs leading-relaxed">
-            检测到您的浏览器正受到旧版冲突配置的干扰。点击下方按钮，系统将执行“物理重置”以应用最新的无冲突修复方案。
+            由于检测到旧版缓存冲突，系统需要执行一次刷新来确保 AI 模型与渲染引擎同步。
         </p>
         <div class="w-full max-w-xs">
-            <button onclick="forceReset()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black shadow-xl active:scale-95 transition-all">
-                立即执行物理重置并进入
+            <button onclick="forceReset()" class="w-full bg-red-600 text-white py-4 rounded-2xl font-black shadow-xl active:scale-95 transition-all">
+                进入节日祝福生成器
             </button>
-            <p class="mt-6 text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em]">
-                Deep Cleaning & Re-initializing...
+            <p class="mt-6 text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em] text-center">
+                Reloading Clean Environment...
             </p>
         </div>
     </div>
 
-    <!-- 启动主入口 -->
     <script type="module" src="index.tsx"></script>
 </body>
 </html>

@@ -1,4 +1,5 @@
 
+
 export enum FestivalType {
   SPRING_FESTIVAL = '春节',
   MID_AUTUMN = '中秋节',
@@ -31,4 +32,15 @@ export interface GreetingState {
   isGeneratingImage: boolean;
   isGeneratingVideo: boolean;
   isGeneratingAudio: boolean;
+}
+
+// 扩展全局 Window 接口以包含 custom 属性，解决 TypeScript 编译错误
+declare global {
+  interface Window {
+    markAppStarted?: () => void;
+    aistudio?: {
+      hasSelectedApiKey: () => Promise<boolean>;
+      openSelectKey: () => Promise<void>;
+    };
+  }
 }
